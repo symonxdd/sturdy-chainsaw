@@ -1,0 +1,43 @@
+name: Windows Build and Release
+
+on:
+  push:
+    tags:
+      - "v*" # Triggers when a version tag like v1.0.0 is pushed
+
+jobs:
+  build:
+    name: Build on Windows
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.20" # Adjust to your Go version
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18" # Match your Vue project's Node version
+
+      - name: Install frontend deps
+        run: npm ci
+
+      - name: Install Wails
+        run: |
+          npm install -g wails
+          wails doctor
+
+      - name: Build Windows App
+        run: wails build
+
+      - name: Upload .exe to GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: build/bin/*.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
