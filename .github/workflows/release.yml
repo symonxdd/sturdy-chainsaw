@@ -1,44 +1,35 @@
-name: Wails build
+name: Wails Windows Build
 
 on:
   push:
     tags:
-      # Match any new tag
-      - "v*"
+      - "v*" # Trigger on version tags like v1.0.0
 
 env:
-  # Necessary for most environments as build failure can occur due to OOM issues
-  NODE_OPTIONS: "--max-old-space-size=4096"
+  NODE_OPTIONS: "--max-old-space-size=4096" # Prevent OOM issues during build
 
 jobs:
   build:
-    strategy:
-      # Failure in one platform build won't impact the others
-      fail-fast: false
-      matrix:
-        build:
-          - name: "App"
-            platform: "linux/amd64"
-            os: "ubuntu-latest"
-          - name: "App"
-            platform: "windows/amd64"
-            os: "windows-latest"
-          - name: "App"
-            platform: "darwin/universal"
-            os: "macos-latest"
+    runs-on: windows-latest
 
-    runs-on: ${{ matrix.build.os }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: recursive
 
-      - name: Build wails
+      - name: Build Wails App for Windows
         uses: dAppServer/wails-build-action@v2.2
         id: build
         with:
-          build-name: ${{ matrix.build.name }}
-          build-platform: ${{ matrix.build.platform }}
+          build-name: "AVD Launcher"
+          build-platform: "windows/amd64"
           package: false
-          go-version: "1.24.2"
+          go-version: "1.24.2" # Your actual Go version
+
+      - name: Upload .exe to GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: build/bin/*.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
