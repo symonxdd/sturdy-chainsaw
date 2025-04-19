@@ -1,5 +1,4 @@
 //go:build windows
-// +build windows
 
 // This file is used for windows platforms
 // using Go build tag (marking per-OS source files)
