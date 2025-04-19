@@ -1,43 +1,44 @@
-name: Windows Build and Release
+name: Wails build
 
 on:
   push:
     tags:
-      - "v*" # Triggers when a version tag like v1.0.0 is pushed
+      # Match any new tag
+      - "v*"
+
+env:
+  # Necessary for most environments as build failure can occur due to OOM issues
+  NODE_OPTIONS: "--max-old-space-size=4096"
 
 jobs:
   build:
-    name: Build on Windows
-    runs-on: windows-latest
+    strategy:
+      # Failure in one platform build won't impact the others
+      fail-fast: false
+      matrix:
+        build:
+          - name: "App"
+            platform: "linux/amd64"
+            os: "ubuntu-latest"
+          - name: "App"
+            platform: "windows/amd64"
+            os: "windows-latest"
+          - name: "App"
+            platform: "darwin/universal"
+            os: "macos-latest"
 
+    runs-on: ${{ matrix.build.os }}
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - name: Checkout
+        uses: actions/checkout@v2
         with:
-          go-version: "1.24.2" # Adjust to your Go version
+          submodules: recursive
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      - name: Build wails
+        uses: dAppServer/wails-build-action@v2.2
+        id: build
         with:
-          node-version: "22.13.1" # Match your Vue project's Node version
-
-      - name: Install frontend deps
-        run: npm ci --prefix frontend
-
-      - name: Install Wails
-        run: |
-          npm install -g wails
-          wails doctor
-
-      - name: Build Windows App
-        run: wails build
-
-      - name: Upload .exe to GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: build/bin/*.exe
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          build-name: ${{ matrix.build.name }}
+          build-platform: ${{ matrix.build.platform }}
+          package: false
+          go-version: "1.24.2"

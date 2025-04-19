@@ -1,8 +1,8 @@
 {
   "name": "wails-release-helper",
   "scripts": {
-    "release:patch": "npm --prefix frontend version patch && git push && git push --follow-tags",
-    "release:minor": "npm --prefix frontend version minor && git push && git push --follow-tags",
-    "release:major": "npm --prefix frontend version major && git push && git push --follow-tags"
+    "release:patch": "npm --prefix frontend version patch -m \"chore: bumped version to %s\" && git push && git push --follow-tags",
+    "release:minor": "npm --prefix frontend version minor -m \"chore: bumped version to %s\" && git push && git push --follow-tags",
+    "release:major": "npm --prefix frontend version major -m \"chore: bumped version to %s\" && git push && git push --follow-tags"
   }
 }
