@@ -25,7 +25,7 @@ jobs:
           node-version: "22.13.1" # Match your Vue project's Node version
 
       - name: Install frontend deps
-        run: npm ci
+        run: npm ci --prefix frontend
 
       - name: Install Wails
         run: |
